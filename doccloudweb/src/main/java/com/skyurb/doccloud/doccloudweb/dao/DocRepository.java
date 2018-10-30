@@ -1,7 +1,7 @@
-package com.skyurb.doccloudweb.dao;
+package com.skyurb.doccloud.doccloudweb.dao;
 
 
-import com.skyurb.doccloudweb.entity.Doc;
+import com.skyurb.doccloud.doccloudweb.entity.Doc;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

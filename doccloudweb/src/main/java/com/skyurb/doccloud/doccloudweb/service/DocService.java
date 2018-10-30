@@ -1,8 +1,8 @@
-package com.skyurb.doccloudweb.service;
+package com.skyurb.doccloud.doccloudweb.service;
 
 
-import com.skyurb.doccloudweb.dao.DocRepository;
-import com.skyurb.doccloudweb.entity.Doc;
+import com.skyurb.doccloud.doccloudweb.dao.DocRepository;
+import com.skyurb.doccloud.doccloudweb.entity.Doc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +21,7 @@ public class DocService {
     }
     public Optional<Doc> findByMd5(String md5){
         return  docRepository.findByMd5(md5);
-
     }
-
     public Doc save(Doc docEntity) {
         return docRepository.save(docEntity);
     }

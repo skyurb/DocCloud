@@ -1,4 +1,4 @@
-package com.skyurb.doccloudweb.util;
+package com.skyurb.doccloud.doccloudweb.util;
 
 import com.google.common.io.Resources;
 import org.apache.hadoop.conf.Configuration;

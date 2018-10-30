@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DocCloud.iml" filepath="$PROJECT_DIR$/DocCloud.iml" />
+      <module fileurl="file://$PROJECT_DIR$/docServiceDeamon/docServiceDeamon.iml" filepath="$PROJECT_DIR$/docServiceDeamon/docServiceDeamon.iml" />
       <module fileurl="file://$PROJECT_DIR$/doccloudweb/doccloudweb.iml" filepath="$PROJECT_DIR$/doccloudweb/doccloudweb.iml" />
     </modules>
   </component>

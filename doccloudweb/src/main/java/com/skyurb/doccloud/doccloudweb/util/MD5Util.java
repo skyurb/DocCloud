@@ -1,4 +1,4 @@
-package com.skyurb.doccloudweb.util;
+package com.skyurb.doccloud.doccloudweb.util;
 
 import java.io.File;
 import java.io.FileInputStream;

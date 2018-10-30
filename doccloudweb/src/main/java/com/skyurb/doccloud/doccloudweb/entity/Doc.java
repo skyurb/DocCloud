@@ -1,4 +1,4 @@
-package com.skyurb.doccloudweb.entity;
+package com.skyurb.doccloud.doccloudweb.entity;
 
 import lombok.Data;
 
@@ -21,7 +21,7 @@ public class Doc {
     @Column(name = "doc_status")
     private String docStatus;
     @Column(name = "doc_size")
-    private String docSize;
+    private int docSize;
     @Column(name = "doc_dir")
     private String docDir;
     @Column(name = "user_id")
