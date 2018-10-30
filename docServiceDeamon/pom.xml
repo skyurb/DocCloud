@@ -24,7 +24,7 @@
             <artifactId>lombok</artifactId>
             <version>1.16.20</version>
         </dependency>
-        <!-- bdb -->
+        <!-- bdb数据库 -->
         <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
