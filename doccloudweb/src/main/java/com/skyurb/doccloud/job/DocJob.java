@@ -6,10 +6,12 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 //此类封装job信息
 @Data
-public class DocJob implements Writable {
+public class DocJob implements Writable,Serializable {
+    private static final long serialVersionUID = 12345678L;
     private int id;
     private String name;
     private DocJobType jobType;
@@ -24,6 +26,8 @@ public class DocJob implements Writable {
     private String input;
     //任务输出路径
     private String output;
+    //任务处理文件名
+    private String fileName;
 
 
     @Override
@@ -38,6 +42,7 @@ public class DocJob implements Writable {
         out.writeInt(retryTime);
         out.writeUTF(input);
         out.writeUTF(output);
+        out.writeUTF(fileName);
 
     }
 
@@ -53,6 +58,7 @@ public class DocJob implements Writable {
         retryTime=in.readInt();
         input=in.readUTF();
         output=in.readUTF();
+        fileName=in.readUTF();
 
     }
 }

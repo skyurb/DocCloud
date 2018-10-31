@@ -79,7 +79,7 @@ public class DocUploadController {
                 //获取当前日期
                 String date=getDate();
                 String dst=HOME+"/"+date+"/"+UUID.randomUUID().toString()+"/";
-                //log.info("dst {}",dst);
+                log.info("dst {}",dst);
                 HdfsUtil.upload(bytes,file.getOriginalFilename(),dst);
                 //保存文档元数据
                 Doc docEntity = new Doc();
@@ -103,10 +103,6 @@ public class DocUploadController {
             }
 
 
-//            Path path = Paths.get("F:\\test\\" + file.getOriginalFilename());
-//            Files.write(path,bytes);
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,10 +119,12 @@ public class DocUploadController {
         docJob.setUserId(userId);
         docJob.setSubmitTime(System.nanoTime());
         docJob.setRetryTime(2);
+        docJob.setFileName(docEntity.getDocName());
         docJob.setJobStatus(JobStatus.SUBMIT);
         docJob.setJobType(DocJobType.DOC_JOB_CONVERT);
         //保存job元数据，防止任务出错
         JobDaemonService jobDaemonService = RPC.getProxy(JobDaemonService.class, 1L, new InetSocketAddress("localhost", 7788), new Configuration());
+        log.info("submit job:{}",docJob);
         jobDaemonService.submitDocJob(docJob);
     }
 

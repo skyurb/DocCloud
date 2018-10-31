@@ -17,8 +17,8 @@ import java.util.UUID;
 */
 public class DocConvertDemo {
     public static void main(String[] args) throws IOException {
-        String command="soffice --headless --invisible --convert-to html d:\\hadoopclientcode.docx";
-        String workDir="d:\\tmp\\.stage\\"+UUID.randomUUID().toString()+"\\";
+        String command="soffice --headless --invisible --convert-to html f:\\test\\Lucene概述.docx";
+        String workDir="f:\\test\\";
         File file = new File(workDir);
         file.mkdirs();
 

@@ -10,6 +10,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
         JobDaemonServiceImpl instance = new JobDaemonServiceImpl();
+        new Thread(instance).start();
         // 创建一个RPC builder
         RPC.Builder builder = new RPC.Builder(new Configuration());
         //指定RPC Server的参数
