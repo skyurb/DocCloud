@@ -32,11 +32,12 @@ public class FullTextIndexUtil {
 
     public static void main(String[] args) throws IOException, SolrServerException {
 //        DocIndex docIndex = new DocIndex();
-//        docIndex.setDocContent("中国人当自强");
-//        docIndex.setId("2");
-//        docIndex.setDocName("");
+//        String content = PdfUtil.getContent("F:\\tmp\\docjobdaemon\\6be98a22-694f-4774-901d-fbef88c32770\\毒笑小说.pdf");
+//        docIndex.setDocContent(content);
+//        docIndex.setId("3");
+//        docIndex.setDocName("毒笑小说");
 //        docIndex.setUrl("hhh");
-//        docIndex.setDocType("docx");
+//        docIndex.setDocType("txt");
 //        add(docIndex);
         //SolrQuery params = new SolrQuery();
 

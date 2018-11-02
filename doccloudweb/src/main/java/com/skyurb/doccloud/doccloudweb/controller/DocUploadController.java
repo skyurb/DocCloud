@@ -1,6 +1,9 @@
 package com.skyurb.doccloud.doccloudweb.controller;
 
+import com.skyurb.doccloud.doccloudweb.dao.DocRepository;
 import com.skyurb.doccloud.doccloudweb.entity.Doc;
+import com.skyurb.doccloud.doccloudweb.entity.DocJobEntity;
+import com.skyurb.doccloud.doccloudweb.service.DocJobService;
 import com.skyurb.doccloud.doccloudweb.service.DocService;
 import com.skyurb.doccloud.doccloudweb.util.HdfsUtil;
 import com.skyurb.doccloud.doccloudweb.util.MD5Util;
@@ -32,6 +35,10 @@ import java.util.UUID;
 public class DocUploadController {
     @Autowired
     private DocService docService;
+    @Autowired
+    private DocRepository docRepository;
+    @Autowired
+    private DocJobService docJobService;
     public static final String[] DOC_SUFFIXS = new String[]{"doc", "docx", "ppt", "pptx", "txt", "xls", "xlsx", "pdf"};
     public static final int DOC_MAX_SIZE = 128 * 1024 * 1024;
     public static final String HOME="hdfs://192.168.203.74:9000/doccloud/";
@@ -93,12 +100,13 @@ public class DocUploadController {
                 docEntity.setDocStatus("upload");
                 docEntity.setMd5(md5);
                 docEntity.setDocCreateTime(new Date());
-                docService.save(docEntity);
+                Doc savedDoc = docService.save(docEntity);
                 //上传成功以后需要提交文档转换任务
                 //转换成html,
-                submitDocJob(docEntity,new Random().nextInt());
+                DocJob docJob = submitDocJob(savedDoc, new Random().nextInt());
                 //转换成pdf提取缩略图，页数
                 //提取文本 建立索引
+                saveDocJob(docJob);
 
             }
 
@@ -108,11 +116,28 @@ public class DocUploadController {
         }
         return "upload success";
     }
+    private void saveDocJob(DocJob docJob) {
+        DocJobEntity docJobEntity = new DocJobEntity();
+        docJobEntity.setId(docJob.getId());
+        docJobEntity.setJobStatus("running");
+        docJobEntity.setSubmitTime(docJob.getSubmitTime());
+        docJobEntity.setDocId(docJob.getDocId());
+        docJobEntity.setInput(docJob.getInput());
+        docJobEntity.setOutput(docJobEntity.getOutput());
+        docJobEntity.setName(docJob.getName());
+        docJobEntity.setRetryTime(docJob.getRetryTime());
+        docJobEntity.setJobType(docJob.getJobType().name());
+        docJobEntity.setFileName(docJob.getFileName());
+        docJobEntity.setUserId(docJob.getUserId());
 
-    private void submitDocJob(Doc docEntity, int userId) throws IOException {
+        docJobService.save(docJobEntity);
+    }
+
+    private DocJob submitDocJob(Doc docEntity, int userId) throws IOException {
         DocJob docJob;
         docJob = new DocJob();
         docJob.setName("doc convert");
+        docJob.setId(UUID.randomUUID().toString());
         //设置文件路径
         docJob.setInput(docEntity.getDocDir()+"/"+docEntity.getDocName());
         docJob.setOutput(docEntity.getDocDir());
@@ -122,10 +147,12 @@ public class DocUploadController {
         docJob.setFileName(docEntity.getDocName());
         docJob.setJobStatus(JobStatus.SUBMIT);
         docJob.setJobType(DocJobType.DOC_JOB_CONVERT);
+        docJob.setDocId(docEntity.getId());
         //保存job元数据，防止任务出错
         JobDaemonService jobDaemonService = RPC.getProxy(JobDaemonService.class, 1L, new InetSocketAddress("localhost", 7788), new Configuration());
         log.info("submit job:{}",docJob);
         jobDaemonService.submitDocJob(docJob);
+        return docJob;
     }
 
     //获取当前日期

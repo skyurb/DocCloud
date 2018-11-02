@@ -26,10 +26,15 @@ import java.util.Iterator;
 */
 public class PdfUtil {
 
+
 //获取页数
     public static int getNumberOfPages(String filePath) throws IOException {
         PDDocument pdfReader = PDDocument.load(new File(filePath));
         int pages = pdfReader.getNumberOfPages();
+//        if (pdfReader!=null){
+//        pdfReader.close();
+//        }
+        pdfReader.close();
         return pages;
     }
     //提取pdf中的文本
@@ -39,6 +44,7 @@ public class PdfUtil {
         PDDocument pdDocument = pdfParser.getPDDocument();
         String text = new PDFTextStripper().getText(pdDocument);
         pdDocument.close();
+
 
         return text;
     }
@@ -63,11 +69,14 @@ public class PdfUtil {
     }
 
 
+
     public static void main(String[] args) throws IOException {
 
         //int numberOfPages = getNumberOfPages("d:\\hadoopclientcode.pdf");
         //System.out.println(numberOfPages);
 
-        getThumbnails("d:\\hadoopclientcode.pdf","d:\\test.png");
+        //getThumbnails("d:\\hadoopclientcode.pdf","d:\\test.png");
+        String content = getContent("F:\\tmp\\docjobdaemon\\6be98a22-694f-4774-901d-fbef88c32770\\毒笑小说.pdf");
+        System.out.println(content);
     }
 }

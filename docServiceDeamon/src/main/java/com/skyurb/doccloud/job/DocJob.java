@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Data
 public class DocJob implements  Writable,Serializable {
     private static final long serialVersionUID = 12345678L;
-    private int id;
+    private String id;
     private String name;
     private DocJobType jobType;
     private int userId;
@@ -37,10 +37,12 @@ public class DocJob implements  Writable,Serializable {
     private String output;
     //任务处理文件名
     private String fileName;
+    //任务处理文档id
+    private int docId;
 
 
     public void write(DataOutput out) throws IOException {
-        out.writeInt(id);
+        out.writeUTF(id);
         out.writeUTF(name);
         out.writeUTF(jobType.name());
         out.writeInt(userId);
@@ -51,11 +53,12 @@ public class DocJob implements  Writable,Serializable {
         out.writeUTF(input);
         out.writeUTF(output);
         out.writeUTF(fileName);
+        out.writeInt(docId);
     }
 
 
     public void readFields(DataInput in) throws IOException {
-        id= in.readInt();
+        id= in.readUTF();
         name=in.readUTF();
         jobType=DocJobType.valueOf(in.readUTF());
         userId=in.readInt();
@@ -66,5 +69,6 @@ public class DocJob implements  Writable,Serializable {
         input=in.readUTF();
         output=in.readUTF();
         fileName=in.readUTF();
+        docId=in.readInt();
     }
 }

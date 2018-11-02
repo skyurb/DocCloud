@@ -1,14 +1,19 @@
 package com.skyurb.doccloud.job;
 
+import com.skyurb.doccloud.job.callback.DocJobCallback;
+import com.skyurb.doccloud.job.callback.DocJobResponse;
 import com.skyurb.doccloud.util.FullTextIndexUtil;
 import com.skyurb.doccloud.util.HdfsUtil;
 import com.skyurb.doccloud.util.PdfUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.ipc.RPC;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 @Slf4j
@@ -34,6 +39,8 @@ public class DocJobHandler implements Runnable {
             convertToHtml(docJob.getFileName(),tmpWorkDir);
             //step2 转换成pdf
             convertToPdf(docJob.getFileName(),tmpWorkDir);
+
+            Thread.sleep(2000);
             //step3 提取页码
             String pdfPath = tmpWorkDirPath + docJob.getFileName().substring(0, docJob.getFileName().indexOf(".")) + ".pdf";
             String htmlPath = tmpWorkDirPath  + docJob.getFileName().substring(0, docJob.getFileName().indexOf(".")) + ".html";
@@ -45,36 +52,62 @@ public class DocJobHandler implements Runnable {
             PdfUtil.getThumbnails(pdfPath,thumbnailsPath);
             //提取文档内容
             String content = PdfUtil.getContent(pdfPath);
+            System.out.println(pdfPath+"............");
             //建立文档对象
             DocIndex docIndex = new DocIndex();
-            docIndex.setDocName("doccloud");
+            log.info("begin create docObject");
+            docIndex.setId(docJob.getDocId());
+            docIndex.setDocName(docJob.getFileName());
             docIndex.setDocContent(content);
             docIndex.setUrl(docJob.getInput() + "/" + docJob.getFileName());
             String[] strings = docJob.getFileName().split("\\.");
             docIndex.setDocType(strings[1]);
             //step5 利用solr建立索引
             FullTextIndexUtil.add(docIndex);
-
+            log.info("solr create success");
             //step6 上传结果
-            HdfsUtil.copyFromLocal(htmlPath, docJob.getInput());
+            HdfsUtil.copyFromLocal(htmlPath, docJob.getOutput());
             log.info("upload {} to hdfs:", htmlPath);
-            HdfsUtil.copyFromLocal(pdfPath, docJob.getInput());
+            HdfsUtil.copyFromLocal(pdfPath, docJob.getOutput());
             log.info("upload {} to hdfs:", pdfPath);
-            HdfsUtil.copyFromLocal(thumbnailsPath, docJob.getInput());
+            HdfsUtil.copyFromLocal(thumbnailsPath, docJob.getOutput());
             log.info("upload {} to hdfs:", thumbnailsPath);
 
             //step7 清理临时目录
             log.info("clear tmpworkdir : {}",tmpWorkDir.getAbsolutePath());
-            //tmpWorkDir.delete();
+           // FileUtils.deleteDirectory(tmpWorkDir);
             //step8 任务成功回调
+            reportDocJob(numberOfPages, docJob, true, "success");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //失败处理
+            log.error("docjob {} failed deal to {}", docJob, e);
+            try {
+                FileUtils.deleteDirectory(tmpWorkDir);
+                reportDocJob(0, docJob, false, e.getMessage());
+            } catch (IOException e1) {
+                log.error("failed: docjob  {}  deal to:{}", docJob, e1.getMessage());
+                //e1.printStackTrace();
+            }
         }
 
     }
+    //报告job成功与否
+    private void reportDocJob(int numberOfPages, DocJob docJob, boolean success, String message) throws IOException {
+        DocJobResponse docJobResponse = new DocJobResponse();
+        docJobResponse.setDocJobId(docJob.getId());
+        docJobResponse.setSuccess(success);
+        docJobResponse.setMessage(message);
+        docJobResponse.setFinishTime(System.currentTimeMillis());
+        docJobResponse.setNumOfPage(numberOfPages);
+        if (!success) {
+            docJobResponse.setRetryTime(1);
+        }
+        DocJobCallback jobCallback = RPC.getProxy(DocJobCallback.class, DocJobCallback.versionID, new InetSocketAddress("localhost", 8877), new Configuration());
+        log.info("report job:{} to web : {}", docJob, docJobResponse);
+        jobCallback.reportDocJob(docJobResponse);
+    }
+
     private void convertToHtml(String fileName, File tmpWorkDir) throws IOException {
         String command = "soffice --headless --invisible --convert-to html " + fileName;
         Process process = Runtime.getRuntime().exec(command, null, tmpWorkDir);

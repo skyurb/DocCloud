@@ -5,7 +5,7 @@ import org.apache.solr.client.solrj.beans.Field;
 @Data
 public class DocIndex {
     @Field
-    private String id;
+    private int id;
     @Field
     private String docName;
     @Field
